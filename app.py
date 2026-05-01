@@ -1,8 +1,9 @@
 import streamlit as st
 import os
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, Settings
-from llama_index.llms.gemini import Gemini
-from llama_index.embeddings.gemini import GeminiEmbedding
+# Ini adalah jembatan penghubung yang baru
+from llama_index.llms.google_genai import GoogleGenAI
+from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 import chromadb
 
@@ -12,29 +13,27 @@ st.caption("Tanya apa saja seputar produk, stok, atau harga!")
 
 @st.cache_resource(show_spinner=False)
 def inisialisasi_chatbot():
-    # Mengambil kunci dari brankas Streamlit
+    # Mengambil kunci
     api_key = st.secrets["GOOGLE_API_KEY"]
-    os.environ["GOOGLE_API_KEY"] = api_key
+    os.environ["GEMINI_API_KEY"] = api_key # Sistem baru menggunakan nama variabel ini
     
-    # 1. Otak Utama AI
-    Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
-    
-    # 2. Penerjemah Dokumen (Memaksa pakai versi terbaru 004)
-    Settings.embed_model = GeminiEmbedding(model_name="models/embedding-001", api_key=api_key)
+    # 1. Menggunakan kelas GoogleGenAI yang baru dan modern
+    Settings.llm = GoogleGenAI(model="gemini-2.5-flash", api_key=api_key)
+    Settings.embed_model = GoogleGenAIEmbedding(model_name="text-embedding-004", api_key=api_key)
 
-    # 3. Membuat folder database yang 100% baru agar tidak bentrok
-    db = chromadb.PersistentClient(path="./database_bersih_v3")
+    # 2. Database super baru agar tidak bentrok dengan sisa-sisa error lama
+    db = chromadb.PersistentClient(path="./database_modern")
     chroma_collection = db.get_or_create_collection("data_bisnis")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # 4. Membaca data
+    # 3. Membaca data
     documents = SimpleDirectoryReader("./data").load_data()
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
     
     return index.as_query_engine()
 
-with st.spinner("Sedang menyiapkan kecerdasan buatan (hanya butuh waktu sebentar)..."):
+with st.spinner("Sedang menghubungkan ke server Google yang baru..."):
     query_engine = inisialisasi_chatbot()
 
 if "messages" not in st.session_state:
