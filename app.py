@@ -18,7 +18,7 @@ def inisialisasi_chatbot():
     
     # Otak & Embedding sekarang 100% menggunakan Gemini (Cloud-ready)
     Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
-    Settings.embed_model = GeminiEmbedding(model_name="models/embedding-001", api_key=api_key)
+    Settings.embed_model = GeminiEmbedding(api_key=api_key)
 
     db = chromadb.PersistentClient(path="./isi_database")
     chroma_collection = db.get_or_create_collection("data_bisnis")
