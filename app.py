@@ -12,42 +12,43 @@ st.caption("Tanya apa saja seputar produk, stok, atau harga!")
 
 @st.cache_resource(show_spinner=False)
 def inisialisasi_chatbot():
-    # Mengambil API Key dari "Brankas Rahasia" Streamlit Cloud
+    # Mengambil kunci dari brankas Streamlit
     api_key = st.secrets["GOOGLE_API_KEY"]
     os.environ["GOOGLE_API_KEY"] = api_key
     
-    # Otak & Embedding sekarang 100% menggunakan Gemini (Cloud-ready)
-    Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
-    Settings.embed_model = GeminiEmbedding(api_key=api_key)
+    # 1. PASTIKAN NAMA MODEL PERSIS SEPERTI INI (Jangan diubah ke versi lain)
+    Settings.llm = Gemini(model="models/gemini-1.5-flash", api_key=api_key)
+    Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
 
-    db = chromadb.PersistentClient(path="./isi_database")
+    # 2. KITA BUAT NAMA FOLDER DATABASE BARU ("database_online") AGAR TIDAK BENTROK
+    db = chromadb.PersistentClient(path="./database_online")
     chroma_collection = db.get_or_create_collection("data_bisnis")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+    # Membaca data dari folder "data" yang ada di GitHub
     documents = SimpleDirectoryReader("./data").load_data()
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
     
     return index.as_query_engine()
 
-with st.spinner("Sedang menyiapkan data..."):
+with st.spinner("Sedang menyiapkan data untuk pertama kalinya (ini butuh waktu beberapa detik)..."):
     query_engine = inisialisasi_chatbot()
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Halo! Ada yang bisa saya bantu hari ini?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "Halo! Ada yang bisa saya bantu terkait bisnis kita hari ini?"}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-prompt = st.chat_input("Ketik pertanyaan Anda (misal: Berapa harga Kopi Arabica?)...")
-if prompt:
+if prompt = st.chat_input("Ketik pertanyaan Anda..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("assistant"):
-        with st.spinner("Berpikir..."):
+        with st.spinner("Mencari informasi..."):
             response = query_engine.query(prompt)
             st.markdown(response.response)
             
