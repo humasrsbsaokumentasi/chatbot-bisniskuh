@@ -17,8 +17,8 @@ def inisialisasi_chatbot():
     os.environ["GOOGLE_API_KEY"] = api_key
     
     # 1. PASTIKAN NAMA MODEL PERSIS SEPERTI INI (Jangan diubah ke versi lain)
-    Settings.llm = Gemini(model="models/gemini-1.5-flash", api_key=api_key)
-    Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
+    Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
+    Settings.embed_model = GeminiEmbedding(api_key=api_key)
 
     # 2. KITA BUAT NAMA FOLDER DATABASE BARU ("database_online") AGAR TIDAK BENTROK
     db = chromadb.PersistentClient(path="./database_online")
