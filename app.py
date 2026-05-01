@@ -21,7 +21,7 @@ def inisialisasi_chatbot():
     Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
 
     # 2. KITA BUAT NAMA FOLDER DATABASE BARU ("database_online") AGAR TIDAK BENTROK
-    db = chromadb.PersistentClient(path="./database_online")
+    db = chromadb.PersistentClient(path="./database_final")
     chroma_collection = db.get_or_create_collection("data_bisnis")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
