@@ -20,7 +20,7 @@ def inisialisasi_chatbot():
     Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
     
     # 2. Penerjemah Dokumen (Memaksa pakai versi terbaru 004)
-    Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
+    Settings.embed_model = GeminiEmbedding(model_name="models/embedding-001", api_key=api_key)
 
     # 3. Membuat folder database yang 100% baru agar tidak bentrok
     db = chromadb.PersistentClient(path="./database_bersih_v3")
