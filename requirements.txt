@@ -1,7 +1,6 @@
 streamlit
 llama-index
 llama-index-llms-google-genai
-llama-index-embeddings-google-genai
+llama-index-embeddings-fastembed
 llama-index-vector-stores-chroma
 chromadb
-protobuf<4.0.0
