@@ -14,7 +14,7 @@ st.caption("Tanya apa saja seputar produk, stok, atau harga!")
 def inisialisasi_chatbot():
     # Mengambil API Key dari "Brankas Rahasia" Streamlit Cloud
     api_key = st.secrets["GOOGLE_API_KEY"]
-    os.environ["AIzaSyAfmANz219-taJAFRNwGN-7QNfOAEbqbSw"] = api_key
+    os.environ["GOOGLE_API_KEY"] = api_key
     
     # Otak & Embedding sekarang 100% menggunakan Gemini (Cloud-ready)
     Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
