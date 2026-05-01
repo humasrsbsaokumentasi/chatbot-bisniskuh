@@ -1,9 +1,9 @@
 import streamlit as st
 import os
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, Settings
-# Ini adalah jembatan penghubung yang baru
 from llama_index.llms.google_genai import GoogleGenAI
-from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
+# Memanggil penerjemah lokal yang kebal error Google
+from llama_index.embeddings.fastembed import FastEmbedEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 import chromadb
 
@@ -15,25 +15,27 @@ st.caption("Tanya apa saja seputar produk, stok, atau harga!")
 def inisialisasi_chatbot():
     # Mengambil kunci
     api_key = st.secrets["GOOGLE_API_KEY"]
-    os.environ["GEMINI_API_KEY"] = api_key # Sistem baru menggunakan nama variabel ini
+    os.environ["GEMINI_API_KEY"] = api_key
     
-    # 1. Menggunakan kelas GoogleGenAI yang baru dan modern
+    # 1. Otak AI tetap menggunakan Gemini yang sudah terbukti jalan
     Settings.llm = GoogleGenAI(model="gemini-2.5-flash", api_key=api_key)
-    Settings.embed_model = GoogleGenAIEmbedding(model_name="text-embedding-004", api_key=api_key)
+    
+    # 2. Penerjemah Dokumen menggunakan mesin lokal FastEmbed (Selamat tinggal error 404!)
+    Settings.embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
-    # 2. Database super baru agar tidak bentrok dengan sisa-sisa error lama
-    db = chromadb.PersistentClient(path="./database_modern")
+    # 3. Database baru khusus untuk mesin lokal
+    db = chromadb.PersistentClient(path="./database_mandiri")
     chroma_collection = db.get_or_create_collection("data_bisnis")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # 3. Membaca data
+    # 4. Membaca data
     documents = SimpleDirectoryReader("./data").load_data()
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
     
     return index.as_query_engine()
 
-with st.spinner("Sedang menghubungkan ke server Google yang baru..."):
+with st.spinner("Sedang memasang penerjemah dokumen mandiri (ini hanya butuh beberapa detik)..."):
     query_engine = inisialisasi_chatbot()
 
 if "messages" not in st.session_state:
