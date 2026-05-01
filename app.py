@@ -17,7 +17,7 @@ def inisialisasi_chatbot():
     os.environ["GOOGLE_API_KEY"] = api_key
     
     # 1. Otak Utama AI
-    Settings.llm = Gemini(model="models/gemini-1.5-flash", api_key=api_key)
+    Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
     
     # 2. Penerjemah Dokumen (Memaksa pakai versi terbaru 004)
     Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
