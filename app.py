@@ -16,27 +16,29 @@ def inisialisasi_chatbot():
     api_key = st.secrets["GOOGLE_API_KEY"]
     os.environ["GOOGLE_API_KEY"] = api_key
     
-    # 1. PASTIKAN NAMA MODEL PERSIS SEPERTI INI (Jangan diubah ke versi lain)
-    Settings.llm = Gemini(model="models/gemini-2.5-flash", api_key=api_key)
+    # 1. Otak Utama AI
+    Settings.llm = Gemini(model="models/gemini-1.5-flash", api_key=api_key)
+    
+    # 2. Penerjemah Dokumen (Memaksa pakai versi terbaru 004)
     Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
 
-    # 2. KITA BUAT NAMA FOLDER DATABASE BARU ("database_online") AGAR TIDAK BENTROK
-    db = chromadb.PersistentClient(path="./database_final")
+    # 3. Membuat folder database yang 100% baru agar tidak bentrok
+    db = chromadb.PersistentClient(path="./database_bersih_v3")
     chroma_collection = db.get_or_create_collection("data_bisnis")
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # Membaca data dari folder "data" yang ada di GitHub
+    # 4. Membaca data
     documents = SimpleDirectoryReader("./data").load_data()
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
     
     return index.as_query_engine()
 
-with st.spinner("Sedang menyiapkan data untuk pertama kalinya (ini butuh waktu beberapa detik)..."):
+with st.spinner("Sedang menyiapkan kecerdasan buatan (hanya butuh waktu sebentar)..."):
     query_engine = inisialisasi_chatbot()
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Halo! Ada yang bisa saya bantu terkait bisnis kita hari ini?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "Halo! Ada yang bisa saya bantu terkait produk kita hari ini?"}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
