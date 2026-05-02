@@ -42,7 +42,7 @@ def ekstrak_dan_tampilkan_foto(teks_jawaban):
     if match:
         file_id = match.group(1)
         direct_link = f"https://drive.google.com/uc?export=view&id={file_id}"
-        st.image(direct_link, caption="Dokumentasi Produk", use_container_width=True)
+        st.image(direct_link, caption="Dokumentasi Produk", width="stretch")
 
 # ------------------------------
 
