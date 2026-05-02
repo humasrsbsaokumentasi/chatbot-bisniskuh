@@ -16,6 +16,7 @@ def inisialisasi_chatbot():
     api_key = st.secrets["GOOGLE_API_KEY"]
     os.environ["GEMINI_API_KEY"] = api_key
     
+    # Menggunakan model yang sudah terbukti stabil di environment Anda
     Settings.llm = GoogleGenAI(model="gemini-2.5-flash", api_key=api_key)
     Settings.embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
@@ -29,17 +30,23 @@ def inisialisasi_chatbot():
     
     return index.as_query_engine()
 
-# --- FUNGSI BARU UNTUK FOTO ---
-def ekstrak_dan_tampilkan_foto(teks_jawaban):
-    match = re.search(r"ID_FOTO:\s*([\w-]+)", teks_jawaban)
+# --- FUNGSI MODIFIKASI UNTUK ESTETIKA ---
+def proses_jawaban_dan_foto(teks_jawaban):
+    """
+    Mencari ID Foto Drive, mengambilnya, lalu menghapus kodenya dari teks jawaban.
+    """
+    pola_id = r"ID_FOTO:\s*([\w-]+)"
+    match = re.search(pola_id, teks_jawaban)
+    
+    file_id = None
+    teks_bersih = teks_jawaban
     
     if match:
         file_id = match.group(1)
-        # Gunakan format thumbnail karena lebih stabil melewati firewall Google
-        direct_link = f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
-        
-        # Gunakan width="stretch" sesuai peringatan error terbaru
-        st.image(direct_link, caption="Dokumentasi Produk", width="stretch")
+        # Menghapus ID_FOTO dari tampilan teks agar lebih estetik
+        teks_bersih = re.sub(pola_id, "", teks_jawaban).strip()
+    
+    return teks_bersih, file_id
 
 # ------------------------------
 
@@ -60,12 +67,20 @@ if prompt := st.chat_input("Ketik pertanyaan Anda..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Mencari informasi..."):
-            # Kita instruksikan AI agar selalu menyertakan ID_FOTO jika ada di data
-            instruksi_tambahan = f"\n\nPenting: Jika ada kolom ID_Foto_Drive di data, tuliskan di akhir jawaban dengan format 'ID_FOTO: [ID]'"
+            # Instruksi agar AI memberikan ID tanpa perlu kita tampilkan ke user
+            instruksi_tambahan = "\n\nPenting: Jika ada ID_Foto_Drive di data, wajib tulis di akhir jawaban dengan format 'ID_FOTO: [ID]'"
             response = query_engine.query(prompt + instruksi_tambahan)
             
-            st.markdown(response.response)
-            # Jalankan fungsi foto tepat setelah jawaban teks muncul
-            ekstrak_dan_tampilkan_foto(response.response)
+            # Memisahkan teks bersih dengan ID foto
+            jawaban_final, id_foto = proses_jawaban_dan_foto(response.response)
             
-    st.session_state.messages.append({"role": "assistant", "content": response.response})
+            # 1. Tampilkan teks yang sudah bersih (tanpa ID_FOTO)
+            st.markdown(jawaban_final)
+            
+            # 2. Tampilkan foto jika ID ditemukan
+            if id_foto:
+                direct_link = f"https://drive.google.com/thumbnail?id={id_foto}&sz=w1000"
+                st.image(direct_link, caption="Dokumentasi Produk", width="stretch")
+            
+    # Simpan jawaban yang sudah bersih ke dalam history chat
+    st.session_state.messages.append({"role": "assistant", "content": jawaban_final})
