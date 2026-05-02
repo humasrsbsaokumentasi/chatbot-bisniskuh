@@ -17,7 +17,8 @@ def inisialisasi_chatbot():
     os.environ["GEMINI_API_KEY"] = api_key
     
     # Menggunakan model yang sudah terbukti stabil di environment Anda
-    Settings.llm = GoogleGenAI(model="gemini-2.5-flash", api_key=api_key)
+    #Settings.llm = GoogleGenAI(model="gemini-2.5-flash", api_key=api_key)
+    Settings.llm = GoogleGenAI(model="gemini-1.5-flash", api_key=api_key)
     Settings.embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
     db = chromadb.PersistentClient(path="./database_mandiri")
