@@ -31,17 +31,14 @@ def inisialisasi_chatbot():
 
 # --- FUNGSI BARU UNTUK FOTO ---
 def ekstrak_dan_tampilkan_foto(teks_jawaban):
-    """
-    Mencari ID Foto Drive di dalam jawaban AI dan menampilkannya sebagai gambar.
-    """
-    # Mencari pola ID Drive (biasanya 33-44 karakter)
-    # Kita asumsikan di database Anda, ID foto diawali dengan kata 'FOTO:' 
-    # agar AI mudah menuliskannya di jawaban.
     match = re.search(r"ID_FOTO:\s*([\w-]+)", teks_jawaban)
     
     if match:
         file_id = match.group(1)
-        direct_link = f"https://drive.google.com/uc?export=view&id={file_id}"
+        # Gunakan format thumbnail karena lebih stabil melewati firewall Google
+        direct_link = f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
+        
+        # Gunakan width="stretch" sesuai peringatan error terbaru
         st.image(direct_link, caption="Dokumentasi Produk", width="stretch")
 
 # ------------------------------
